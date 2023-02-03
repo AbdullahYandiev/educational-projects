@@ -1,0 +1,42 @@
+(a v !a) * (x = y) ? !(false -> False -> FALSE) and (x % y)
+
+
+
+(x * y) +  (x * y)
+
+
+((((x v y) * ¬(z * x)) v x) * z) % (x v z)*((x v y) * z) ? z * (x v y)
+
+Эквивалентны:
+x * (y v (z -> x)) ? x
+x*y*!z v x*y ? y * x
+!(x -> y) v (x * z) ? (x -> y) -> (x * z)
+!(x*y*!z) ? !((x * !z) ~ (!(x v y) -> x) v true) v (x * !y) ~ (!(x v y) -> x) v true
+
+Не эквиваленты:
+x * (y v (z -> x)) ? x * y v z -> x
+x*y*!z v x*y ? !((x * !z) ~ (!(x v y) -> x) v true) v (x * !y) ~ (!(x v y) -> y) v true
+
+Диагностика ошибок
+
+Неверный формат ввода:
+x v y | x * y
+
+Нарушен баланс скобок:
+x -> y v z ? x v y -> (x v (y) -> x v (x * !y) ~ (!(x v y) -> x) v true
+
+Недопустимая операция:
+x - (y * z) ? x v y
+
+Пропущен операнд:
+x * v y ? x * y
+
+Пропущена операция:
+x y v z ? x
+x v y (x v y) -> x v (x * !y) ~ (!(x v y) -> x) v true ? x
+
+Неверная запись логической константы:
+1 v x ? x * y
+
+Неверная запись переменой:
+x * (y v (1z -> x)) ? x * y v z -> x

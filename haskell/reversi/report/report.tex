@@ -1,0 +1,220 @@
+\documentclass[oneside,final,14pt]{extreport}
+\usepackage[utf8]{inputenc}
+\usepackage[russianb]{babel}
+\usepackage{vmargin}
+\setpapersize{A4}
+\setmarginsrb{2cm}{2cm}{2cm}{2cm}{0pt}{0mm}{0pt}{13mm}
+\usepackage{indentfirst}
+\usepackage{graphicx}
+\sloppy
+\renewcommand\thesection{\arabic{section}}
+\newenvironment{compactlist}{
+    \begin{list}
+    {{$\bullet$}}
+    {
+        \setlength\partopsep{0pt}
+        \setlength\parskip{0pt}
+        \setlength\parsep{5pt}
+        \setlength\topsep{5pt}
+        \setlength\itemsep{0pt}                        
+    }
+}{
+    \end{list}
+}
+
+\begin{document}
+
+\begin{titlepage}
+    \begin{figure}[h]
+        \centering
+        \includegraphics[width=0.5\textwidth]{logo}
+    \end{figure}
+    \vspace{-12mm}
+    \begin{center}
+        \small\textmd
+        {
+        МОСКОВСКИЙ ГОСУДАРСТВЕННЫЙ УНИВЕРСИТЕТ ИМЕНИ \\ М. В. ЛОМОНОСОВА \\
+        Факультет вычислительной математики и кибернетики \\
+        Кафедра алгоритмических языков
+        }
+        \vfill
+        \LARGE Отчёт о выполнении задания практикума \\
+        \vspace{5mm}
+        \Huge\textbf{"<Игра Реверси">}
+        \vfill
+        \normalsize
+        \vspace{-10mm}
+        \rightline{\itСтудент 324 группы}
+        \rightline{А. А. Яндиев}
+        \vfill
+        Москва, 2022
+    \end{center}
+    
+
+\end{titlepage}
+
+\setcounter{page}{2}
+
+\section{Постановка задачи}
+В данной программе реализована известная настольная игра Реверси. 
+
+\noindent {\itshape Правила игры:}
+\begin{compactlist}
+    \item Первый ход принадлежит игроку, которому достались белые фишки. Следующую игру начинает игрок с черными фишками и т. д.;
+    \item Всего используемых фишек 64. Фишки меняют цвет. Изначально на поле находятся 4 фишки (2 черных и 2 белых) - остальные 60 фишек находятся за пределами поля и выставляются поочередно;
+    \item Сделать ход на поле означает взятой вне поля фишкой закрыть проход сопернику, выставляя ее таким образом, чтобы между выставленной и какой-либо другой фишкой игрока образовался туннель, заполненный дисками противника (за один ход можно выставить на поле только один диск);
+    \item Все побитые диски с поля боя забирает ходивший игрок, т. е. меняет фишки противника на свои. При этом меняются диски соперника как по прямой, так по диагонали;
+    \item Если у игроков есть возможность ходить фишками, то пропуск хода невозможен. Если же все ходы перекрыты, то участник пропускает ход;
+    \item Игра продолжается до тех пор, пока все диски противника не будут побиты, или на доске не останется свободных клеток.
+\end{compactlist}
+В программе реализованы все пункты правил игры.
+
+\subsection {Базовые требования и основной функционал}
+\begin{enumerate}
+    \item Предоставлена возможность играть в игру в режиме «человек против человека», используя графический интерфейс;
+    \item Не допускаются невозможные по правилам игры ходы игроков;
+    \item Ведется счет игровых очков на всем протяжении игры;
+    \item Определяется и отображается очередность ходов игроков (и в том случае, когда у одного из игроков нет доступных ходов);
+    \item Автоматически определяется момент окончании игры: победы одного из игроков или ничьей. Результат демонстрируется пользователям.
+    \item В конце игры пользователям предлагается начать новую партию, нажав на клавишу пробела. 
+\end{enumerate}
+
+\section {Модули проекта}
+\noindentПроект состоит из следующих модулей:
+\begin{compactlist}
+    \item {\tt Consts.hs} - константы для настроек игры;
+    \item {\tt Types.hs} - объявление основных типов;
+    \item {\tt Board.hs} - работа с игровым полем;
+    \item {\tt Moves.hs} - обработка ходов игроков;
+    \item {\tt Draw.hs} - реализация графического интерфейса;
+    \item {\tt Events.hs} - реализация обработчиков внешних событий;
+    \item {\tt InitGame.hs} - начальное состояние игры;
+    \item {\tt Game.hs} - запуск игры;
+    \item {\tt Main.hs} - главный модуль приложения.
+\end{compactlist}
+\vspace{3mm}
+\noindentВ модуле Consts.hs описаны следующие константные значения:
+\begin{compactlist}
+    \item {\tt gridSize} - размер игрового поля;
+    \item {\tt windowSizeX, windowSizeY} - размеры игрового окна;
+    \item {\tt startScore} - начальный счет игры;
+    \item {\tt boardColor} - цвет игрового поля;
+    \item и т. д.
+\end{compactlist}
+\vspace{2mm}
+\noindentВ модуле Types.hs описаны следующие типы:
+\begin{compactlist}
+    \item {\tt Coordinate} - описывает координаты сетки игрового поля;
+    \item {\tt Score} - описывает текущий счет игры;
+    \item {\tt Player} - описывает цвет дисков игрока;
+    \item {\tt Board} - описывает игровое поле;
+    \item {\tt GameWorld} - описывает игровой мир.
+\end{compactlist}
+\vspace{2mm}
+\noindentВ модуле Board.hs реализованы следующие функции:
+\begin{compactlist}
+    \item {\tt initBoard} - начальное состояние игрового поля;
+    \item {\tt mapBoardSquares} - применяет заданную функцию к каждой клетке игрового поля;
+    \item {\tt coordinateInBounds} - проверяет, находится ли заданная координата  клетки в сетке игрового поля;
+    \item {\tt diskAtCoordinate} - возвращает цвет диска заданной клетки поля;
+    \item {\tt opposingPlayer} - возвращает оппонента заданного игрока.
+\end{compactlist}
+\vspace{3mm}
+\noindentВ модуле Moves.hs реализованы следующие функции:
+\begin{compactlist}
+    \item {\tt getMovesOnClick} - определяет список координат с новыми фишками игрока после хода;
+    \item {\tt movesAvailableForPlayer} - определяет список всех доступных ходов игрока;
+    \item {\tt noMovesAvailableForBoth} - проверяет, доступен ли ход хотя бы для одного из игроков;
+    \item {\tt applyMove} - применяет ход игрока.
+\end{compactlist}
+\vspace{3mm}
+\noindentВ модуле Draw.hs реализованы следующие функции:
+\begin{compactlist}
+    \item {\tt drawGame} - объединяет все элементы графического интерфейса;
+    \item {\tt drawGrid} - отрисовывает сетку игрового поля;
+    \item {\tt drawDisks} - отрисовывает текущие диски игроков на поле;
+    \item {\tt drawScore} - выводит текущий счет игры;
+    \item {\tt drawTurnText} - выводит текст об очередности ходов;
+    \item {\tt drawGameOver} - выводит текст об окончании игры.
+\end{compactlist}
+\vspace{3mm}
+\noindentВ модуле Events.hs реализованы следующие функции:
+\begin{compactlist}
+    \item {\tt handleEvent} - обрабатывает все внешние события;
+    \item {\tt checkPlayerTurn} - проверяет допустимость совершенного хода и применяет его.
+\end{compactlist}
+\vspace{3mm}
+\noindentВ модуле InitGame.hs реализована следующая функция:
+\begin{compactlist}
+    \item {\tt initGame} - определяет начальное состояние игрового поля.
+\end{compactlist}
+\vspace{3mm}
+\noindentВ модуле Game.hs реализована следующая функция:
+\begin{compactlist}
+    \item {\tt runGame} - запускает игру.
+\end{compactlist}
+\vspace{3mm}
+\noindentВ модуле Main.hs реализована следующая функция:
+\begin{compactlist}
+    \item {\tt main} - основная функция, с которой начинается работа всего приложения.
+\end{compactlist}
+\newpage
+\section {Используемые библиотеки}
+\noindentПри реализации использовались следующие библиотеки:
+\begin{compactlist}
+    \item {\tt Gloss} - графический интерфейс и обработка внешних событий;
+    \item {\tt Array} - работа с массивами.
+\end{compactlist}
+
+\section {Сценарии работы с приложением}
+Для запуска приложения достаточно перейти в корень папки проекта и запустить приложение в консоли с помощью команды {\tt stack run}.
+
+В начале игры пользователям отображается начальное состояние игрового поля, установленное классическими правилами: 
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.7\textwidth]{fp}
+    \caption{Начальное состояние игры}
+    \label{fig:my_label}
+\end{figure}
+\newpage
+
+Для совершения хода игроку необходимо нажать на соответствующую клетку игрового поля левой кнопкой мыши. Если ход доступен, то он будет выполнен, иначе ничего не произойдет. Таким образом, состояние игрового поля не изменится до тех пор, пока текущий игрок не совершит корректный ход. 
+
+В нижнем левом углу игрового окна после каждого хода обновляется информация об очередности ходов игроков:
+\vspace{7mm}
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.35\textwidth]{sl}
+    \caption{Ход белого игрока}
+    \label{fig:my_label}
+\end{figure}
+\vspace{7mm}
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.95\textwidth]{sr}
+    \caption{Пропуск хода черным игроком}
+    \label{fig:my_label}
+\end{figure}
+
+\vspace{7mm}
+На протяжении всей игры пользователям отображается текущий счет противостояния:
+\vspace{7mm}
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.65\textwidth]{t}
+    \caption{Счет игры}
+    \label{fig:my_label}
+\end{figure}
+
+\newpage
+В конце игры пользователям отображается информация о победителе. А также предлагается начать новую игру: для этого следует нажать клавишу пробела:
+\vspace{7mm}
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.7\textwidth]{fin}
+    \caption{Конец игры}
+    \label{fig:my_label}
+\end{figure}
+
+\end{document}

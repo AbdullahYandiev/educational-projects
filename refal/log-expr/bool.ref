@@ -1,0 +1,205 @@
+* БНФ логических выражений:
+* <выражение>    ::= <подвыражение> | <выражение> ‘~’ <подвыражение>
+* <подвыражение> ::= <слагаемое> | <подвыражение> ‘->’ <слагаемое>
+* <слагаемое>    ::= <множитель> | <слагаемое> ‘v’ <множитель> | <слагаемое> ‘%’ <множитель>
+* <множитель>    ::= <операнд> | <множитель> ‘*’ <операнд>
+* <операнд>      ::=  <литерал> | ¬<литерал> | (<выражение>) | ¬(<выражение>)
+
+* причем в базисе {TRUE, +, *}:
+* >> x ~ y  = TRUE + x + y
+* >> x -> y = 1 + x + x * y
+* >> x v y  = x + y + x * y
+* >> x % y  = x + y + x * y
+* >> x * y  = x * y
+* >> ¬x     = TRUE + x
+
+CMP_LOG_EXPRS START
+ EXTRN CARD, PROUT, OPNGET, LIBGET, CLSGET, CHARTOF, FUNCTAB, FTOCHAR, PRINT
+ EMPTY TRUE, FALSE, ERROR, EQ, IMPL, OR, PROC, AND, XOR, NOT
+ ENTRY GO
+
+GO = <FUNCTAB /TRUE/><FUNCTAB /FALSE/><FUNCTAB /ERROR/> +
+     <FUNCTAB /EQ/><FUNCTAB /IMPL/><FUNCTAB /OR/><FUNCTAB /PROC/><FUNCTAB /AND/><FUNCTAB /XOR/><FUNCTAB /NOT/> +
+     <PROUT 'Формат ввода: <лог.выр.1> ? <лог.выр.2>'> +
+     <HAND_INPUT <CARD 'Хотите ввести данные из файла? (yes/no) '>>
+
+
+HAND_INPUT 'yes' = <CMP_LOG_EXPRS <LIBGET <OPNGET <CARD 'Введите имя файла: '>>>><CLSGET>
+           'Yes' = <CMP_LOG_EXPRS <LIBGET <OPNGET <CARD 'Введите имя файла: '>>>><CLSGET>
+           'YES' = <CMP_LOG_EXPRS <LIBGET <OPNGET <CARD 'Введите имя файла: '>>>><CLSGET>
+           'no'  = <CMP_LOG_EXPRS <CARD 'Введите логические формулы согласно формату:\n'>>
+           'No'  = <CMP_LOG_EXPRS <CARD 'Введите логические формулы согласно формату:\n'>>
+           'NO'  = <CMP_LOG_EXPRS <CARD 'Введите логические формулы согласно формату:\n'>>
+           e1 = <HAND_INPUT <CARD 'Введите yes или no!\nХотите ввести данные из файла? (yes/no) '>>
+
+CMP_LOG_EXPRS e1'?'e2 = <CMP_POLINS <PROUT '1 выражение:'><PRINT_POL <POLIN_ZHEG e1>>/XOR/<PROUT '\n2 выражение:'><PRINT_POL <POLIN_ZHEG e2>>>
+              e1 = <PROUT 'ОШИБКА: неверный формат ввода'>
+
+CMP_POLINS e1/ERROR/e2 =
+           e1 = <DECISION <HAND_XOR e1>>
+
+DECISION /FALSE/ = <PROUT '\nРезультат:\n>> Логические выражения эквивалентны <<'>
+         e1 = <PROUT '\nРезультат:\n>> Логические выражения НЕ эквивалентны <<'>
+
+HAND_XOR e1 = <GET_ALL_BR <HAND_POL <CHECK_SAME <PUT_BR e1>>()>>
+
+GET_ALL_BR (e1)/XOR/e2 = e1/XOR/<GET_ALL_BR e2>
+           (e1)() = e1
+
+POLIN_ZHEG e1 = <GET_BR <FICT <HAND_POL <HAND_POL <VAR <CHECK_SAME <HAND_SAME <PUT_BR <VYR <STRUCT_BR <CHECK_OP <DEL_SPACE <OP e1>>>>>>>>>>>>>
+
+OP e1'~'e2 = <OP e1<CHARTOF 'EQ'>e2>
+   e1'='e2 = <OP e1<CHARTOF 'EQ'>e2>
+   e1'->'e2 = <OP e1<CHARTOF 'IMPL'>e2>
+   e1'v'e2 = <OP e1<CHARTOF 'OR'>e2>
+   e1'|'e2 = <OP e1<CHARTOF 'OR'>e2>
+   e1' or 'e2 = <OP e1' '<CHARTOF 'OR'>' 'e2>
+   e1' OR 'e2 = <OP e1' '<CHARTOF 'OR'>' 'e2>
+   e1'%'e2 = <OP e1<CHARTOF 'PROC'>e2>
+   e1'*'e2 = <OP e1<CHARTOF 'AND'>e2>
+   e1'&'e2 = <OP e1<CHARTOF 'AND'>e2>
+   e1' and 'e2 = <OP e1' '<CHARTOF 'AND'>' 'e2>
+   e1' AND 'e2 = <OP e1' '<CHARTOF 'AND'>' 'e2>
+   e1'¬'e2 = <OP e1<CHARTOF 'NOT'>e2>
+   e1'!'e2 = <OP e1<CHARTOF 'NOT'>e2>
+   e1 = e1
+
+DEL_SPACE e1s('()'L)2e('()'LD)3s(' ')4e(' ')5e('()'LD)6s('()'LD)7e8 = /ERROR/'ОШИБКА: Пропущена операция'
+          e1s('\n')2e('\n')3 = <DEl_SPACE e1>
+          e1' 'e2 = e1<DEL_SPACE e2>
+          e1 = e1
+
+CHECK_OP /ERROR/e1 = /ERROR/e1
+         e1s(('()'LD/EQ//IMPL//AND//OR//NOT//PROC/))2e3 = /ERROR/'ОШИБКА: Недопустимая операция: 's2
+         e1 = e1
+
+STRUCT_BR /ERROR/e1s(F)2e3 = /ERROR/e1
+          e1')'e2 = <STRUCT_BR <PODSTR_BR e1')'> e2>
+          e1'('e2 = /ERROR/'ОШИБКА: Нарушен баланс скобок'
+          e1 = e1
+
+PODSTR_BR R e1'('e2')' = e1(e2)
+            e1 = /ERROR/'ОШИБКА: Нарушен баланс скобок'
+
+VYR R /ERROR/e1 = /ERROR/e1
+      e1/EQ/e2 = <HAND_BR (/TRUE/)/XOR/<PVYR e2>>/XOR/<VYR e1>
+      e1 = <HAND_BR <PVYR e1>>
+
+PVYR R e1/IMPL/e2 = <TMP_PVYR (<PVYR e1>)<SLAG e2>>
+       e1 = <SLAG e1>
+
+TMP_PVYR (e1)e2 = (/TRUE/)/XOR/e1/XOR/(<HAND_BR e1>)/AND/(<HAND_BR e2>)
+
+SLAG R e1s(/OR//PROC/)2e3 = <TMP_SLAG s2(<SLAG e1>)<MNOJ e3>>
+       e1 = <MNOJ e1>
+
+TMP_SLAG /OR/(e1)e2 = e2/XOR/e1/XOR/(<HAND_BR e1>)/AND/(<HAND_BR e2>)
+         /PROC/(e1)e2 = (/TRUE/)/XOR/e2/XOR/e1
+
+MNOJ R e1/AND/e2 = <MNOJ e1>/AND/<OPER e2>
+       e1 = <OPER e1>
+
+OPER /NOT/(e1) = (/TRUE//XOR/<VYR e1>)
+     (e1) = (<VYR e1>)
+     /NOT/e1 = (/TRUE//XOR/<LITER e1>)
+     = /ERROR/'ОШИБКА: Пропущен операнд'
+     e1 = (<LITER e1>)
+  
+LITER 'TRUE' = <CHARTOF 'TRUE'>
+      'True' = <CHARTOF 'TRUE'>
+      'true' = <CHARTOF 'TRUE'>
+      'FALSE' = <CHARTOF 'FALSE'>
+      'False' = <CHARTOF 'FALSE'>
+      'false' = <CHARTOF 'FALSE'>
+      s(L)1e(LD)2 = <CHARTOF s1e2>
+      e(D)1 = /ERROR/'ОШИБКА: 'e1' не может быть логической константой'
+      e1 = /ERROR/'ОШИБКА: 'e1' не может быть именем переменной'
+
+HAND_BR e1/ERROR/e2 = /ERROR/e2
+        e1(e2/ERROR/e3)e4 = /ERROR/e3
+        (e1)/XOR/e2 = e1/XOR/<HAND_BR e2>
+        (e1/XOR/e2)/AND/e3/XOR/e4 = <HAND_BR (e1)/AND/e3>/XOR/<HAND_BR (e2)/AND/e3>/XOR/<HAND_BR e4>
+        (e1/XOR/e2)e3 = <HAND_BR (e1)e3>/XOR/<HAND_BR (e2)e3>
+        (e1)/AND/(e2/XOR/e3) = e1/AND/e2/XOR/<HAND_BR (e1)/AND/(e3)>
+        (e1)/AND/(e2) = e1/AND/e2
+        (e1)/AND/(e2)e3 = <HAND_BR (<HAND_BR (e1)/AND/(e2)>)e3>
+        (e1) = e1
+
+PUT_BR e1/XOR/e2 = (e1)/XOR/<PUT_BR e2>
+       e1 = (e1)
+
+HAND_SAME (e1)/XOR/e2 = (<DEL_SAME e1>)/XOR/<HAND_SAME e2>
+          (e1) = (<DEL_SAME e1>)
+
+DEL_SAME s1/AND/s1 = s1
+         e1/AND/s2/AND/s2e3 = <DEL_SAME e1/AND/s2e3>
+         e1s2/AND/s2/AND/e3 = <DEL_SAME e1s2/AND/e3>
+         e1s2/AND/e3/AND/s2e4 = e1<DEL_SAME s2/AND/e3e4>
+         e1 = e1
+
+CHECK_SAME e1(/ERROR/e2)e3 = (/ERROR/e2)
+           e1(/TRUE//AND/e2)e3 = <CHECK_SAME e1(e2)e3>
+           e1(e2/AND//TRUE/e3)e4 = <CHECK_SAME e1(e2e3)e4>
+           e1(s2e3/FALSE/e4)e5 = <CHECK_SAME e1(/FALSE/)e5>
+           e1(e2/FALSE/s3e4)e5 = <CHECK_SAME e1(/FALSE/)e5>
+           (e1)/XOR/e2 = (e1)/XOR/<CHECK_SAME <CHG_SLAG (e1)e2>>
+           e1 = e1
+
+CHG_SLAG (e1)(e2)/XOR/e3 = <LEAVE_ONE (<CLEAN e1>)(<CLEAN e2>)(e1)(e2)>/XOR/<CHG_SLAG (e1)e3>
+         (e1)(e2) = <LEAVE_ONE (<CLEAN e1>)(<CLEAN e2>)(e1)(e2)>
+
+CLEAN s1/AND/e2 = s1<CLEAN e2>
+      s1 = s1         
+
+LEAVE_ONE (e1s2e3)(e4s2e5)(e6)(e7) = <LEAVE_ONE (e1e3)(e4e5)(e6)(e7)>
+          ()()(e1)(e2) = (e1)
+          (s1e2)(e3)(e4)(e5) = (e5)
+          (e1)(s2e3)(e4)(e5) = (e5)
+
+VAR  e1(e2/ERROR/e3)e4 = (/ERROR/e3)
+     e1 = <TMP_VAR e1()>
+ 
+TMP_VAR (e1)/XOR/e2(e3) = (e1)/XOR/<TMP_VAR e2<MAKE_SET <CLEAN e1>(e3)>>
+        (e1)(e2) = (e1)<MAKE_SET <CLEAN e1>(e2)>
+
+MAKE_SET s1e2(e3s1e4) = <MAKE_SET e2(e3s1e4)>
+         s((/TRUE//FALSE/))1e2(e3) = <MAKE_SET e2(s1e3)>
+         s1e2 = <MAKE_SET e2>
+         (e1) = (e1)
+
+HAND_POL  (/FALSE/)/XOR/e1 = <HAND_POL e1>
+          e1/XOR/(/FALSE/)e2 = <HAND_POL e1e2>
+          (e1)/XOR/(e1)(e2) = (/FALSE/)(e2)
+          e1/XOR/(e2)/XOR/(e2)e3 = <HAND_POL e1e3>
+          e1(e2)/XOR/(e2)/XOR/e3 = <HAND_POL e1e3>
+          e1(e2)/XOR/e3/XOR/(e2)e4 = e1 <HAND_POL e3e4>
+          e1 = e1        
+
+FICT (e1)/XOR/e2(e3) = (e1)/XOR/<FICT e2<REMOVE <CLEAN e1>(e3)>>
+     (e1)(e2) = (e1)(<TO_CHAR <REMOVE <CLEAN e1>(e2)>>)
+     (e1) = (e1)
+
+TO_CHAR (s1) = <FTOCHAR s1>
+        (s1e2) = <FTOCHAR s1>', '<TO_CHAR (e2)>
+        () =
+
+PRINT_FICT s1e2 = <PROUT 'Список фиктивных переменных: 's1e2>
+           e1 = <PROUT 'Фиктивных переменных нет'>
+
+REMOVE s1e2(e3s1e4) = <REMOVE e2(e3e4)>
+       s1e2 = <REMOVE e2>
+       (e1) = (e1)
+
+GET_BR (e1)/XOR/e2(e3) = e1/XOR/<GET_BR e2(e3)>
+       (e1)(e2) = e1(e2)
+       (e1) = e1
+
+POL_TO_CHAR /XOR/e1 = ' + '<POL_TO_CHAR e1>
+            /AND/e1 = ' * '<POL_TO_CHAR e1>
+            s1e2 = <FTOCHAR s1><POL_TO_CHAR e2>
+            = 
+
+PRINT_POL /ERROR/e1 = /ERROR/<PROUT e1>
+          e1(e2) = e1<PROUT 'Полином Жегалкина: '<POL_TO_CHAR e1>><PRINT_FICT e2>       
+
+ END

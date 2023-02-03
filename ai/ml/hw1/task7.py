@@ -1,0 +1,1 @@
+process = lambda l : sorted({j*j for i in l for j in i})[::-1]

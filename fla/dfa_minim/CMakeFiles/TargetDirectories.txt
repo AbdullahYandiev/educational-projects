@@ -1,0 +1,7 @@
+/Users/YandievAbdullax/desktop/fla/dfa_minim/CMakeFiles/dfa_minim.dir
+/Users/YandievAbdullax/desktop/fla/dfa_minim/CMakeFiles/edit_cache.dir
+/Users/YandievAbdullax/desktop/fla/dfa_minim/CMakeFiles/rebuild_cache.dir
+/Users/YandievAbdullax/desktop/fla/dfa_minim/CMakeFiles/list_install_components.dir
+/Users/YandievAbdullax/desktop/fla/dfa_minim/CMakeFiles/install.dir
+/Users/YandievAbdullax/desktop/fla/dfa_minim/CMakeFiles/install/local.dir
+/Users/YandievAbdullax/desktop/fla/dfa_minim/CMakeFiles/install/strip.dir

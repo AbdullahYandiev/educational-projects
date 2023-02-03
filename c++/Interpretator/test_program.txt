@@ -1,0 +1,67 @@
+program {
+	struct X {
+		int x;
+		bool y;
+	};
+
+	int x = 5, y = 10, z = 1;
+	string s1 = "abc", s2, s3, s4;
+	bool a = true, b = false, c = true;
+	X r, q, u;
+
+	write("Result: ", endl, "1) ", a and c and b, endl, "2) ", not (b or (a and c)), endl);
+
+	u.x = x;
+	u.y = false;
+
+	r = q = u;
+
+	write(r.x, "   ", r.y, endl, q, endl);
+
+	x = z = y = - (y * (x * x) + y) * (x - z);
+
+	write(x, tab, y, endl);
+
+L1: read(x);
+	if (x > 0)
+		write("x = ", x, endl);
+	else
+		goto L1;
+
+	read(s1);
+	for (; ; x = x - 1) {
+		read(s2);
+		s1 = s1 + s2;
+		if (x <= 0)
+			break;
+		else
+			write("RESULT STRING:", tab, s1, endl);
+	}
+
+	while (s1 != "exit")
+		for (;;) {
+			read(s1);
+			break;
+		}
+
+
+	read(x);
+	goto P;	
+
+
+L:  write("Once again", endl);
+
+P:
+	while (x > 0) {
+		read(y);
+		if (y > 0)
+			/*goto L;*/
+			break;
+		else
+			/*goto R;*/
+			break;
+	}
+
+R:  write("End of work", endl);	
+
+}

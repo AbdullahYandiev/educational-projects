@@ -1,0 +1,29 @@
+FRACTIONS START
+ EXTRN CARD, PROUT, NUMB, SYMB, ADD, SUB, MUL, DIV, DR
+ ENTRY GO
+
+GO = <PROUT 'x / y = '<FRACTOCHAR <DIV_FRAC (<REDUCE <NUMB <CARD 'x_numerator = '>>'/'<NUMB <CARD 'x_denumerator = '>>>)<REDUCE <NUMB <CARD 'y_numerator = '>>'/'<NUMB <CARD 'y_denumerator = '>>>>>>
+
+REDUCE '-'e1'/-'e2 = <SUBRED (<NOD (e1)e2>)e1'/'e2>
+       '-'e1'/'e2 = '-'<SUBRED (<NOD (e1)e2>)e1'/'e2>
+       e1'/-'e2 = '-'<SUBRED (<NOD (e1)e2>)e1'/'e2>
+       e1'/'e2 = <SUBRED (<NOD (e1)e2>)e1'/'e2>
+
+SUBRED (e1)e2'/'e3 = <DIV (e2)e1>'/'<DIV (e3)e1>
+
+FRACTOCHAR /0/e1 = '0'
+           e1'/'/1/ = <SYMB e1>
+           e1'/'e2 = <SYMB e1>'/'<SYMB e2>
+
+NOD (e1)/0/ = e1
+    (e1)e2 = <NOD (e2)<MOD <DR (e1)e2>>>
+
+MOD e1(e2) = e2
+
+ADD_FRAC (e1'/'e2)e3'/'e4 = <REDUCE <ADD (<MUL (e1)e4>)<MUL (e2)e3>>'/'<MUL (e2)e4>>
+
+SUB_FRAC (e1'/'e2)e3'/'e4 = <REDUCE <SUB (<MUL (e1)e4>)<MUL (e2)e3>>'/'<MUL (e2)e4>>
+
+MUL_FRAC (e1'/'e2)e3'/'e4 = <REDUCE <MUL (e1)e3>'/'<MUL (e2)e4>>
+
+DIV_FRAC (e1'/'e2)e3'/'e4 = <REDUCE <MUL (e1)e4>'/'<MUL (e2)e3>>
